@@ -1,6 +1,6 @@
 # Borehole Image Gap Restoration
 
-Code for structural prior reconstruction, observable-residual refinement, and safe measured-texture routing with Gaussian projection.
+Code for structural prior reconstruction, observable-residual refinement, and safe measured-texture routing with low-frequency consistency projection.
 
 ## Requirements
 
