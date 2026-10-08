@@ -48,7 +48,7 @@ def load_warmstart(model: ErrorGuidedJointRefiner, path: Path, device: torch.dev
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train the residual refiner on mask-first Stage1 pairs")
     parser.add_argument("--pairs", type=Path, required=True, help="Root containing per-case Stage1 training pairs")
-    parser.add_argument("--warmstart", type=Path, required=True, help="Compatible residual-refiner initialization")
+    parser.add_argument("--warmstart", type=Path, help="Optional compatible checkpoint; omit to train from random initialization")
     parser.add_argument("--output", type=Path, required=True, help="Output checkpoint path")
     parser.add_argument("--device", choices=("cpu", "cuda"), default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--iterations", type=int, default=25000, help="Optimization iterations")
@@ -64,7 +64,11 @@ def main() -> None:
     set_seed(42)
     rng = random.Random(42)
     model = ErrorGuidedJointRefiner().to(device)
-    load_warmstart(model, args.warmstart, device)
+    if args.warmstart is None:
+        print("Training residual refiner from random initialization (seed 42)", flush=True)
+    else:
+        load_warmstart(model, args.warmstart, device)
+        print(f"Training residual refiner from checkpoint: {args.warmstart}", flush=True)
     model.train()
     optimizer = torch.optim.Adam(model.parameters(), lr=2e-4)
     low_kernel = gaussian_kernel(device, sigma=4.0)
@@ -109,7 +113,12 @@ def main() -> None:
                     print(f"Early stopping at iteration {iteration}", flush=True)
                     break
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    torch.save({"model": model.state_dict(), "iteration": stopped_at}, args.output)
+    torch.save({
+        "model": model.state_dict(),
+        "iteration": stopped_at,
+        "initialization": "random" if args.warmstart is None else "warmstart",
+        "warmstart_checkpoint": str(args.warmstart) if args.warmstart is not None else None,
+    }, args.output)
     print(f"Checkpoint: {args.output}")
 
 

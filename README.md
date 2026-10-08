@@ -14,11 +14,13 @@ Python 3.10+, PyTorch, NumPy, and OpenCV. Install with `pip install -r requireme
 
 ### Train the residual refiner
 
-Train from mask-first Stage1 pairs containing `original.png`, `stage1_raw.png`, `validated_real_gap_mask.png`, and `train_synthetic_mask.png`:
+Train from random initialization (seed 42) using mask-first Stage1 pairs containing `original.png`, `stage1_raw.png`, `validated_real_gap_mask.png`, and `train_synthetic_mask.png`:
 
 ```bash
-python train_refiner.py --pairs PATH_TO_PAIRS --warmstart PATH_TO_INITIAL_WEIGHTS --output refiner.pth
+python train_refiner.py --pairs PATH_TO_PAIRS --output refiner.pth
 ```
+
+To continue training from compatible refiner weights, add `--warmstart PATH_TO_INITIAL_WEIGHTS`. The Stage1 training pairs and trained refiner weights are not included in this repository; supply your own pairs for training. A new random-initialization run is not expected to reproduce the historical trained weights or manuscript metrics without the same training data and protocol.
 
 ### Run restoration
 
